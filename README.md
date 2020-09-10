@@ -19,14 +19,14 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 L.mask('bound.json', {}).addTo(map);
 ```
 
-# Creation 
+## Creation 
 
 | Factory | Description |
 |--------|-------------|
 | L.mask((<String|Object> geosjon, <Path options> options?) | Loads layer data in GeoJSON format from a URL or an object， sets styling options. |
 
 
-# Options  
+## Options  
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
