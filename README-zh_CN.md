@@ -18,6 +18,12 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 L.mask('bound.json', {}).addTo(map);
 ```
 
+# 调用 
+
+| 方法 | 描述 |
+|--------|-------------|
+| L.mask((<String|Object> geosjon, <Path options> options?) | 从 GeoJSON url 或者 Json 对象加载遮罩多边形，并设置显示样式选项。 |
+
 ## 选项
 | 选项 | 类型 | 默认值 | 描述 |
 |--------|------|---------|-------------|

@@ -6,7 +6,7 @@ Check out the [demo](https://ptma.github.io/Leaflet.Mask/examples/mask.html).
 
 ![Preview](https://ptma.github.io/Leaflet.Mask/examples/preview.png)
 
-## Example
+## Useage example
 ```javascript
 var map = L.map("map", {
     center: [29, 120],
@@ -18,6 +18,13 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 L.mask('bound.json', {}).addTo(map);
 ```
+
+# Creation 
+
+| Factory | Description |
+|--------|-------------|
+| L.mask((<String|Object> geosjon, <Path options> options?) | Loads layer data in GeoJSON format from a URL or an object， sets styling options. |
+
 
 # Options  
 
