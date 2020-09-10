@@ -1,5 +1,5 @@
-# Leaflet.Legend 
-Leaflet.Legend 是一个 Leaflet 插件， 用于显示图例符号和切换相应的叠加层的显示.  
+# Leaflet.Mask 
+Leaflet.Mask 是一个 Leaflet 插件， 用于将边界数据以外的地图区域遮盖起来，可以用它来实现重点显示局部地图区域的效果。  
 
 在线 [demo](https://ptma.gitee.io/leaflet.mask/examples/mask.html).
 
