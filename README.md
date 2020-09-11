@@ -21,9 +21,13 @@ L.mask('bound.json', {}).addTo(map);
 
 ## Creation 
 
-| Factory | Description |
-|--------|-------------|
-| L.mask((<String|Object> geosjon, <Path options> options?) | Loads layer data in GeoJSON format from a URL or an object， sets styling options. |
+```javascript
+L.mask((geosjon, options?)
+```
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| geosjon | String\|Object | .geojson URL or GeoJSON object |
+| options | Object | Layer options |
 
 
 ## Options  

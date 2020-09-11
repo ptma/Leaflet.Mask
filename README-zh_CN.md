@@ -19,10 +19,13 @@ L.mask('bound.json', {}).addTo(map);
 ```
 
 ## 调用 
-
-| 方法 | 描述 |
-|--------|-------------|
-| L.mask((<String|Object> geosjon, <Path options> options?) | 从 GeoJSON url 或者 Json 对象加载遮罩多边形，并设置显示样式选项。 |
+```javascript
+L.mask((geosjon, options?)
+```
+| 参数 | 类型 | 描述 |
+|-----------|------|-------------|
+| geosjon | String\|Object | .geojson URL 或 GeoJSON 对象 |
+| options | Object | 遮罩图层选项 |
 
 ## 选项
 | 选项 | 类型 | 默认值 | 描述 |
