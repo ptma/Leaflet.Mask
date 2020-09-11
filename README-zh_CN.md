@@ -20,7 +20,7 @@ L.mask('bound.json', {}).addTo(map);
 
 ## 调用 
 ```javascript
-L.mask((geosjon, options?)
+L.mask(geosjon, options?)
 ```
 | 参数 | 类型 | 描述 |
 |-----------|------|-------------|

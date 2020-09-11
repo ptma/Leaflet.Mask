@@ -22,7 +22,7 @@ L.mask('bound.json', {}).addTo(map);
 ## Creation 
 
 ```javascript
-L.mask((geosjon, options?)
+L.mask(geosjon, options?)
 ```
 | Parameter | Type | Description |
 |-----------|------|-------------|
