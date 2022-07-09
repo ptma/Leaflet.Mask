@@ -31,19 +31,21 @@
 
             this._layers = {};
             this._bounds = new L.LatLngBounds();
-            this._maskPolygonCoords = [
-                [
-                    [-360, -90],
-                    [-360, 90],
-                    [360, 90],
-                    [360, -90],
-                ],
-            ];
+            const initialCoordinates = [
+                [-3600, -900],
+                [-3600, 900],
+                [3600, 900],
+                [3600, -900],
+            ]
+            const initialCoordinatesKey = this._hash(initialCoordinates)
+            this._maskPolygonCoords = {
+                initialCoordinatesKey : initialCoordinates
+            };
 
             if (geojson) {
                 if (typeof geojson === "string") {
                     var _that = this;
-                    this.request(geojson, function (json) {
+                    this._request(geojson, function (json) {
                         _that.addData(json);
                     });
                 } else {
@@ -52,56 +54,105 @@
             }
         },
         addData: function (geojson) {
-            this.addObject(geojson);
-            this.addMaskLayer();
+            this._addObject(geojson);
+            this._setMaskLayer();
         },
-        addObject: function (json) {
+        removeData: function (geojson) {
+            this._removeObject(geojson);
+            this._setMaskLayer();
+        },
+        _addObject: function (json) {
             var i, len;
             if (L.Util.isArray(json)) {
                 for (i = 0, len = json.length; i < len; i++) {
-                    this.addObject(json[i]);
+                    this._addObject(json[i]);
                 }
             } else {
                 switch (json.type) {
                     case "FeatureCollection":
                         var features = json.features;
                         for (i = 0, len = features.length; i < len; i++) {
-                            this.addObject(features[i]);
+                            this._addObject(features[i]);
                         }
                         return;
                     case "Feature":
-                        this.addObject(json.geometry);
+                        this._addObject(json.geometry);
                         return;
                     case "GeometryCollection":
                         var geometries = json.geometries;
                         for (i = 0, len = geometries.length; i < len; i++) {
-                            this.addObject(geometries[i]);
+                            this._addObject(geometries[i]);
                         }
                         return;
-
                     case "Polygon":
-                        this.addRemovalPolygonCoordinates(json.coordinates);
+                        this._addRemovalPolygonCoordinates(json.coordinates);
                         return;
                     case "MultiPolygon":
-                        this.addRemovalMultiPolygonCoordinates(json.coordinates);
+                        this._addRemovalMultiPolygonCoordinates(json.coordinates);
                         return;
                     default:
                         return;
                 }
             }
         },
-        addRemovalPolygonCoordinates: function (coords) {
-            for (var i = 0, len = coords.length; i < len; i++) {
-                this._maskPolygonCoords.push(coords[i]);
-                this.updateBounds(coords[i]);
+        _removeObject: function (json) {
+            var i, len;
+            if (L.Util.isArray(json)) {
+                for (i = 0, len = json.length; i < len; i++) {
+                    this._removeObject(json[i]);
+                }
+            } else {
+                switch (json.type) {
+                    case "FeatureCollection":
+                        var features = json.features;
+                        for (i = 0, len = features.length; i < len; i++) {
+                            this._removeObject(features[i]);
+                        }
+                        return;
+                    case "Feature":
+                        this._removeObject(json.geometry);
+                        return;
+                    case "GeometryCollection":
+                        var geometries = json.geometries;
+                        for (i = 0, len = geometries.length; i < len; i++) {
+                            this._removeObject(geometries[i]);
+                        }
+                        return;
+                    case "Polygon":
+                        this._removeRemovalPolygonCoordinates(json.coordinates);
+                        return;
+                    case "MultiPolygon":
+                        this._removeRemovalMultiPolygonCoordinates(json.coordinates);
+                        return;
+                    default:
+                        return;
+                }
             }
         },
-        addRemovalMultiPolygonCoordinates: function (coords) {
+        _addRemovalPolygonCoordinates: function (coords) {
             for (var i = 0, len = coords.length; i < len; i++) {
-                this.addRemovalPolygonCoordinates(coords[i]);
+                const key = this._hash(coords[i])
+                this._maskPolygonCoords[key] = coords[i];
+                this._updateBounds(coords[i]);
             }
         },
-        updateBounds: function (coords) {
+        _addRemovalMultiPolygonCoordinates: function (coords) {
+            for (var i = 0, len = coords.length; i < len; i++) {
+                this._addRemovalPolygonCoordinates(coords[i]);
+            }
+        },
+        _removeRemovalPolygonCoordinates: function (coords) {
+            for (var i = 0, len = coords.length; i < len; i++) {
+                const key = this._hash(coords[i])
+                delete this._maskPolygonCoords[key];
+            }
+        },
+        _removeRemovalMultiPolygonCoordinates: function (coords) {
+            for (var i = 0, len = coords.length; i < len; i++) {
+                this._removeRemovalPolygonCoordinates(coords[i]);
+            }
+        },
+        _updateBounds: function (coords) {
             for (var i = 0, len = coords.length; i < len; i++) {
                 var coords2 = coords[i];
                 for (var j = 0, lenJ = coords2.length; j < lenJ; j++) {
@@ -109,46 +160,50 @@
                 }
             }
         },
-        addMaskLayer: function () {
-            var latlngs = this.coordsToLatLngs(this._maskPolygonCoords);
+        _setMaskLayer: function () {
+            if(this.masklayer){
+                this.removeLayer(this.masklayer)
+            }
+            var latlngs = this._coordsToLatLngs(Object.values(this._maskPolygonCoords));
             var layer = new L.Polygon(latlngs, this.options);
+            this.masklayer = layer
             this.addLayer(layer);
-            if (this.options.fitBounds) {
+            if (this.options.fitBounds && this._map) {
                 this._map.fitBounds(this._bounds);
             }
-            if (this.options.restrictBounds) {
+            if (this.options.restrictBounds && this._map) {
                 this._map.setMaxBounds(this._bounds);
             }
         },
-        dimension: function (arr) {
+        _dimension: function (arr) {
             var j = 1;
             for (var i in arr) {
                 if (arr[i] instanceof Array) {
-                    if (1 + this.dimension(arr[i]) > j) {
-                        j = j + this.dimension(arr[i]);
+                    if (1 + this._dimension(arr[i]) > j) {
+                        j = j + this._dimension(arr[i]);
                     }
                 }
             }
             return j;
         },
-        coordsToLatLng: function (coords) {
+        _coordsToLatLng: function (coords) {
             return new L.LatLng(coords[1], coords[0], coords[2]);
         },
-        coordsToLatLngs: function (coords) {
+        _coordsToLatLngs: function (coords) {
             var latlngs = [];
-            var dimensions = this.dimension(coords);
+            var _dimensions = this._dimension(coords);
             for (var i = 0, len = coords.length, latlng; i < len; i++) {
-                if (dimensions > 2) {
-                    latlng = this.coordsToLatLngs(coords[i]);
+                if (_dimensions > 2) {
+                    latlng = this._coordsToLatLngs(coords[i]);
                 } else {
-                    latlng = this.coordsToLatLng(coords[i]);
+                    latlng = this._coordsToLatLng(coords[i]);
                 }
                 latlngs.push(latlng);
             }
 
             return latlngs;
         },
-        request: function (url, success, error) {
+        _request: function (url, success, error) {
             var xhr = new XMLHttpRequest();
             xhr.responseType = "json";
             xhr.onreadystatechange = function () {
@@ -167,6 +222,9 @@
             xhr.open("GET", url, true);
             xhr.send(null);
         },
+        _hash: function(coordinates) {
+            return btoa(JSON.stringify(coordinates))
+        }
     });
 
     L.mask = function (geojson, options) {
